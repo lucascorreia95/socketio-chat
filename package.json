@@ -1,0 +1,17 @@
+{
+  "name": "socketio-chat",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "author": "Lucas Correia",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "start": "nodemon"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
