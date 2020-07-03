@@ -10,7 +10,7 @@ app.get('/', (_req, res) => {
   res.sendFile(`${__dirname}/index.html`);
 });
 
-const users = [];
+let users = [];
 
 function getUserFromList(id) {
   const filtered = users.filter((user) => user.id === id);
@@ -21,14 +21,30 @@ function getUserFromList(id) {
   return null;
 }
 
+function removeUserFromList(id) {
+  const filtered = users.filter((user) => user.id === id);
+  users = filtered;
+  return null;
+}
+
 io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const user = getUserFromList(socket.id);
-    io.emit('user disconnected', `${user.nickname} left the chat`);
+    removeUserFromList(socket.id);
+    if (user) {
+      io.emit('user disconnected', `${user.nickname} left the chat`);
+    } else {
+      io.emit('user disconnected', 'Someone left the chat');
+    }
   });
 
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+    const user = getUserFromList(socket.id);
+    if (user) {
+      io.emit('chat message', `${user.nickname}: ${msg}`);
+    } else {
+      io.emit('chat message', `Unknown: ${msg}`);
+    }
   });
 
   socket.on('nickname', (nickname) => {
