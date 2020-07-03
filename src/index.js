@@ -10,13 +10,30 @@ app.get('/', (_req, res) => {
   res.sendFile(`${__dirname}/index.html`);
 });
 
+const users = [];
+
+function getUserFromList(id) {
+  const filtered = users.filter((user) => user.id === id);
+  if (filtered.length > 0) {
+    return filtered[0];
+  }
+
+  return null;
+}
+
 io.on('connection', (socket) => {
-  console.log('a user connected');
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    const user = getUserFromList(socket.id);
+    io.emit('user disconnected', `${user.nickname} left the chat`);
   });
+
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
+  });
+
+  socket.on('nickname', (nickname) => {
+    users.push({ id: socket.id, nickname });
+    io.emit('user connected', `${nickname} joined the chat`);
   });
 });
 
