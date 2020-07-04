@@ -1,10 +1,13 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
 
 const app = express();
 const httpServer = http.createServer(app);
 const io = socketIo(httpServer);
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (_req, res) => {
   res.sendFile(`${__dirname}/index.html`);
@@ -22,8 +25,13 @@ function getUserFromList(id) {
 }
 
 function removeUserFromList(id) {
-  const filtered = users.filter((user) => user.id === id);
+  const filtered = users.filter((user) => user.id !== id);
   users = filtered;
+  return null;
+}
+
+function addUserToList(id, nickname) {
+  users.push({ id, nickname });
   return null;
 }
 
@@ -36,20 +44,22 @@ io.on('connection', (socket) => {
     } else {
       io.emit('user disconnected', 'Someone left the chat');
     }
+    io.emit('list users', users);
   });
 
   socket.on('chat message', (msg) => {
     const user = getUserFromList(socket.id);
     if (user) {
-      io.emit('chat message', `${user.nickname}: ${msg}`);
+      socket.broadcast.emit('chat message', `${user.nickname}: ${msg}`);
     } else {
-      io.emit('chat message', `Unknown: ${msg}`);
+      socket.broadcast.emit('chat message', `Unknown: ${msg}`);
     }
   });
 
   socket.on('nickname', (nickname) => {
-    users.push({ id: socket.id, nickname });
-    io.emit('user connected', `${nickname} joined the chat`);
+    addUserToList(socket.id, nickname);
+    socket.broadcast.emit('user connected', `${nickname} joined the chat`);
+    io.emit('list users', users);
   });
 });
 

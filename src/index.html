@@ -2,41 +2,22 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
-      form input { border: 0; padding: 10px; flex: 1; min-width: 0; margin-right: 0.5%; }
-      form button { background: rgb(130, 224, 255); border: none; padding: 10px; flex: 0 0 auto; min-width: 0; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-      #messages li.logout { color: red; }
-      #messages li.login { color: green; }
-      #login {
-        display: flex;
-        align-items: center;
-        height: 100vh;
-        width: 50%;
-        justify-content: center;
-        margin: 0 auto;
-      }
-      #login form { position: relative; }
-
-      .hidden { display: none!important; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div id="login">
       <form action="">
-        <input placeholder="Tell me your nickname, please!" id="nickname" autocomplete="off" required minlength="3" />
+        <input placeholder="Tell me your nickname, please!" id="nickname" autocomplete="off" required minlength="3" autofocus />
         <button>Login</button>
       </form>
     </div>
     <div id="chat" class="hidden">
-      <ul id="messages"></ul>
+      <div class="container">
+        <ul id="messages"></ul>
+        <ul id="users-online"></ul>
+      </div>
       <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
+        <input id="m" autocomplete="off" placeholder="Type here your message ..." /><button>Send</button>
       </form>
     </div>
     <script src="/socket.io/socket.io.js"></script>
@@ -61,18 +42,32 @@
           socket.emit('nickname', $('#nickname').val());
           handleVisible('#login', false);
           handleVisible('#chat', true);
+          $('#m').focus();
           return false;
         });
 
         $('#chat form').submit(function(e) {
           e.preventDefault(); // prevents page reloading
           socket.emit('chat message', $('#m').val());
+          $('#messages').append($('<li>').text(`Você: ${$('#m').val()}`));
           $('#m').val('');
           return false;
         });
 
         socket.on('chat message', function(msg){
           $('#messages').append($('<li>').text(msg));
+        });
+
+        socket.on('list users', function(data){
+          $('#users-online').html('');
+          $('#users-online').append($('<li class="title">').text(`${data.length} Online Users`));
+          data.map(user => {
+            if(socket.id === user.id) {
+              $('#users-online').append($(`<li id="${user.id}" class="user">`).text(`${user.nickname} (You)`));
+            } else {
+              $('#users-online').append($(`<li id="${user.id}" class="user">`).text(user.nickname));
+            }
+          });
         });
 
         socket.on('user disconnected', function(msg){
