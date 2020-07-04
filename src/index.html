@@ -13,71 +13,18 @@
     </div>
     <div id="chat" class="hidden">
       <div class="container">
-        <ul id="messages"></ul>
+        <div class="content">
+          <ul id="messages"></ul>
+          <div id="users-typing"></div>
+        </div>
         <ul id="users-online"></ul>
       </div>
       <form action="">
-        <input id="m" autocomplete="off" placeholder="Type here your message ..." /><button>Send</button>
+        <input id="m" autocomplete="off" placeholder="Type here your message ..." minlength="3" /><button>Send</button>
       </form>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script>
-      $(function () {
-        var socket = io();
-
-        function handleVisible(target, value) {
-          if (value) {
-            $(target).removeClass('hidden');
-            return;
-          }
-
-          $(target).addClass('hidden');
-
-          return;
-        };
-
-        $('#login form').submit(function(e) {
-          e.preventDefault(); // prevents page reloading
-          socket.emit('nickname', $('#nickname').val());
-          handleVisible('#login', false);
-          handleVisible('#chat', true);
-          $('#m').focus();
-          return false;
-        });
-
-        $('#chat form').submit(function(e) {
-          e.preventDefault(); // prevents page reloading
-          socket.emit('chat message', $('#m').val());
-          $('#messages').append($('<li>').text(`Você: ${$('#m').val()}`));
-          $('#m').val('');
-          return false;
-        });
-
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-        });
-
-        socket.on('list users', function(data){
-          $('#users-online').html('');
-          $('#users-online').append($('<li class="title">').text(`${data.length} Online Users`));
-          data.map(user => {
-            if(socket.id === user.id) {
-              $('#users-online').append($(`<li id="${user.id}" class="user">`).text(`${user.nickname} (You)`));
-            } else {
-              $('#users-online').append($(`<li id="${user.id}" class="user">`).text(user.nickname));
-            }
-          });
-        });
-
-        socket.on('user disconnected', function(msg){
-          $('#messages').append($('<li class="logout">').text(msg));
-        });
-
-        socket.on('user connected', function(msg){
-          $('#messages').append($('<li class="login">').text(msg));
-        });
-      });
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>

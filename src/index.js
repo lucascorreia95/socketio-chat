@@ -31,7 +31,44 @@ function removeUserFromList(id) {
 }
 
 function addUserToList(id, nickname) {
-  users.push({ id, nickname });
+  users.push({ id, nickname, typing: false });
+  return null;
+}
+
+function removeTypingFromUsersList(id) {
+  users = users.map((user) => {
+    if (user.id === id) {
+      return {
+        ...user,
+        typing: false,
+      };
+    }
+    return user;
+  });
+
+  return null;
+}
+
+function getUsersTypingFromList() {
+  const filtered = users.filter((user) => user.typing === true);
+  if (filtered.length > 0) {
+    return filtered;
+  }
+
+  return [];
+}
+
+function addTypingToUsersList(id) {
+  users = users.map((user) => {
+    if (user.id === id) {
+      return {
+        ...user,
+        typing: true,
+      };
+    }
+    return user;
+  });
+
   return null;
 }
 
@@ -60,6 +97,16 @@ io.on('connection', (socket) => {
     addUserToList(socket.id, nickname);
     socket.broadcast.emit('user connected', `${nickname} joined the chat`);
     io.emit('list users', users);
+  });
+
+  socket.on('is typing', () => {
+    addTypingToUsersList(socket.id);
+    socket.broadcast.emit('users typing', getUsersTypingFromList());
+  });
+
+  socket.on('stoped typing', () => {
+    removeTypingFromUsersList(socket.id);
+    socket.broadcast.emit('users typing', getUsersTypingFromList());
   });
 });
 
