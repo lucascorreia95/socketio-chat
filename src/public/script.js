@@ -2,6 +2,16 @@
 $(() => {
   const socket = io();
 
+  function handleClickTab() {
+    $('.room').attr('data-active', 'false');
+    $('#tabs-list li').attr('data-active', 'false');
+    const ref = $(this).attr('data-ref');
+    $(this).attr('data-active', true);
+    $(`#${ref}`).attr('data-active', 'true');
+  }
+
+  $('#tabs-list li').on('click', handleClickTab);
+
   function handleVisible(target, value) {
     if (value) {
       $(target).removeClass('hidden');

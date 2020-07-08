@@ -131,3 +131,35 @@ form button {
 .hidden {
 	display: none!important;
 }
+
+.room {
+	display: none;
+}
+
+.room[data-active="true"] {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	flex-flow: column;
+}
+
+#tabs-list {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	border: 2px solid black;
+	list-style: none;
+}
+
+#tabs-list li{
+	border: none;
+	padding: 10px;
+	flex: 0 0 auto;
+	min-width: 0;
+	border: 2px solid black;
+	cursor: pointer;
+}
+
+#tabs-list li[data-active="true"] {
+	background: rgb(130, 224, 255);
+}

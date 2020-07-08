@@ -12,16 +12,41 @@
       </form>
     </div>
     <div id="chat" class="hidden">
-      <div class="container">
-        <div class="content">
-          <ul id="messages"></ul>
-          <div id="users-typing"></div>
-        </div>
-        <ul id="users-online"></ul>
+      <div class="tabs">
+        <ul id="tabs-list">
+          <li data-active="true" data-ref="geral">
+            Geral
+          </li>
+
+          <li data-active="false" data-ref="test">
+            Test
+          </li>
+        </ul>
       </div>
-      <form action="">
-        <input id="m" autocomplete="off" placeholder="Type here your message ..." minlength="3" /><button>Send</button>
-      </form>
+      <div id="geral" class="room" data-active="true">
+        <div class="container">
+          <div class="content">
+            <ul id="messages"></ul>
+            <div id="users-typing"></div>
+          </div>
+          <ul id="users-online"></ul>
+        </div>
+        <form action="">
+          <input id="m" autocomplete="off" placeholder="Type here your message ..." minlength="3" /><button>Send</button>
+        </form>
+      </div>
+
+      <div id="test" class="room" data-active="false">
+        <div class="container">
+          <div class="content">
+            <ul id="messages"></ul>
+            <div id="users-typing"></div>
+          </div>
+        </div>
+        <form action="">
+          <input id="m" autocomplete="off" placeholder="Type here your message ..." minlength="3" /><button>Send</button>
+        </form>
+      </div>
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
