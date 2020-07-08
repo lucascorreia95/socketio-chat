@@ -45,6 +45,11 @@ const socketCreator = (httpServer) => {
       removeTypingFromUsersList(socket.id);
       socket.broadcast.emit('users typing', getUsersTypingFromList());
     });
+
+    socket.on('private room', (id) => {
+      const user = getUserFromList(socket.id);
+      io.to(id).emit('private room', { id: user.id, nickname: user.nickname });
+    });
   });
 };
 

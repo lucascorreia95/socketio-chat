@@ -7,10 +7,38 @@ $(() => {
     $('#tabs-list li').attr('data-active', 'false');
     const ref = $(this).attr('data-ref');
     $(this).attr('data-active', true);
-    $(`#${ref}`).attr('data-active', 'true');
+    $(`#chat #${ref}`).attr('data-active', 'true');
   }
 
-  $('#tabs-list li').on('click', handleClickTab);
+  function createNewChat(id, nickname) {
+    $('#chat').append(`
+      <div id="${id}" class="room" data-active="false">
+        <div class="container">
+          <div class="content">
+            <ul id="messages"></ul>
+            <div id="users-typing"></div>
+          </div>
+        </div>
+        <form action="">
+          <input id="m" autocomplete="off" placeholder="Type here your message ..." minlength="3" /><button>Send</button>
+        </form>
+      </div>
+    `);
+
+    $('#tabs-list').append(`
+      <li data-active="false" data-ref="${id}">
+        ${nickname}
+      </li>
+    `);
+  }
+
+  function handleClickPrivate() {
+    const id = $(this).attr('id');
+    const nickname = $(this).children('span').text();
+    socket.emit('private room', id);
+    createNewChat(id, nickname);
+    $('#tabs-list li').on('click', handleClickTab);
+  }
 
   function handleVisible(target, value) {
     if (value) {
@@ -20,6 +48,8 @@ $(() => {
 
     $(target).addClass('hidden');
   }
+
+  $('#tabs-list li').on('click', handleClickTab);
 
   $('#login form').submit((e) => {
     e.preventDefault(); // prevents page reloading
@@ -69,8 +99,11 @@ $(() => {
         );
       } else {
         $('#users-online').append(
-          $(`<li id="${user.id}" class="user">`).text(user.nickname),
+          $(`<li id="${user.id}" class="user">`).append(
+            `<span>${user.nickname}</span><button>Private room</button>`,
+          ),
         );
+        $(`#${user.id}`).on('click', handleClickPrivate);
       }
       return null;
     });
@@ -82,6 +115,11 @@ $(() => {
 
   socket.on('user connected', (msg) => {
     $('#messages').append($('<li class="login">').text(msg));
+  });
+
+  socket.on('private room', ({ id, nickname }) => {
+    createNewChat(id, nickname);
+    $('#tabs-list li').on('click', handleClickTab);
   });
 
   socket.on('users typing', (data) => {
