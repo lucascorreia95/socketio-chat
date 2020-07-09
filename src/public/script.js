@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 $(() => {
   const socket = io();
+  const defaultRef = 'geral';
 
   function handleClickTab() {
     $('.room').attr('data-active', 'false');
@@ -88,10 +89,14 @@ $(() => {
     return false;
   });
 
-  handleNewForm('#geral');
+  handleNewForm(`#${defaultRef}`);
 
-  socket.on('chat message', (msg) => {
-    $('#messages').append($('<li>').text(msg));
+  socket.on('chat message', (msg, ref) => {
+    if (ref) {
+      $(`#chat #${ref} #messages`).append($('<li>').text(msg));
+    } else {
+      $(`#chat #${defaultRef} #messages`).append($('<li>').text(msg));
+    }
   });
 
   socket.on('list users', (data) => {
@@ -130,13 +135,23 @@ $(() => {
     $('#tabs-list li').on('click', handleClickTab);
   });
 
-  socket.on('users typing', (data) => {
-    $('#users-typing').html('');
-    const typing = data.filter((user) => user.id !== socket.id);
-    if (typing.length > 0) {
-      const names = typing.map((user) => user.nickname);
-      const msg = `${names.join(' and ')} is typing ...`;
-      $('#users-typing').append($('<span class="users-typing">').text(msg));
+  socket.on('users typing', (data, ref) => {
+    if (ref) {
+      $(`#chat #${ref} #users-typing`).html('');
+      const msg = data[0] ? `${data[0].nickname} is typing ...` : '';
+      $(`#chat #${ref} #users-typing`).append(
+        $('<span class="users-typing">').text(msg),
+      );
+    } else {
+      $(`#chat #${defaultRef} #users-typing`).html('');
+      const typing = data.filter((user) => user.id !== socket.id);
+      if (typing.length > 0) {
+        const names = typing.map((user) => user.nickname);
+        const msg = `${names.join(' and ')} is typing ...`;
+        $(`#chat #${defaultRef} #users-typing`).append(
+          $('<span class="users-typing">').text(msg),
+        );
+      }
     }
   });
 });

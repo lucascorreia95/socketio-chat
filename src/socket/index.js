@@ -22,12 +22,20 @@ const socketCreator = (httpServer) => {
       io.emit('list users', removeUserFromList(socket.id));
     });
 
-    socket.on('chat message', (msg) => {
+    socket.on('chat message', (msg, room) => {
       const user = getUserFromList(socket.id);
+      let response = '';
+
       if (user) {
-        socket.broadcast.emit('chat message', `${user.nickname}: ${msg}`);
+        response = `${user.nickname}: ${msg}`;
       } else {
-        socket.broadcast.emit('chat message', `Unknown: ${msg}`);
+        response = `Unknown: ${msg}`;
+      }
+
+      if (room) {
+        socket.to(room).emit('chat message', response, socket.id);
+      } else {
+        socket.broadcast.emit('chat message', response, null);
       }
     });
 
@@ -36,14 +44,23 @@ const socketCreator = (httpServer) => {
       io.emit('list users', addUserToList(socket.id, nickname));
     });
 
-    socket.on('is typing', () => {
-      addTypingToUsersList(socket.id);
-      socket.broadcast.emit('users typing', getUsersTypingFromList());
+    socket.on('is typing', (room) => {
+      if (!room) {
+        addTypingToUsersList(socket.id);
+        socket.broadcast.emit('users typing', getUsersTypingFromList());
+      } else {
+        const user = getUserFromList(socket.id);
+        socket.to(room).emit('users typing', [user], socket.id);
+      }
     });
 
-    socket.on('stoped typing', () => {
-      removeTypingFromUsersList(socket.id);
-      socket.broadcast.emit('users typing', getUsersTypingFromList());
+    socket.on('stoped typing', (room) => {
+      if (!room) {
+        removeTypingFromUsersList(socket.id);
+        socket.broadcast.emit('users typing', getUsersTypingFromList());
+      } else {
+        socket.to(room).emit('users typing', [], socket.id);
+      }
     });
 
     socket.on('private room', (id) => {
