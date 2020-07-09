@@ -51,6 +51,20 @@ form button {
 	height: 100%;
 }
 
+#users-online li {
+	margin: 10px;	
+}
+
+#users-online button {
+	background: rgb(130, 224, 255);
+	padding: 2px;
+	flex: 0 0 auto;
+	min-width: 0;
+	border: 2px solid;
+	cursor: pointer;
+	margin: 0 10px;
+}
+
 #messages li {
 	padding: 5px 10px;
 }
