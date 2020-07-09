@@ -86,6 +86,7 @@ $(() => {
     handleVisible('#login', false);
     handleVisible('#chat', true);
     $('#m').focus();
+    $(`#${defaultRef} #messages`).html('');
     return false;
   });
 
