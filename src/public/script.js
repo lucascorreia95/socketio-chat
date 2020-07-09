@@ -32,12 +32,40 @@ $(() => {
     `);
   }
 
+  function handleNewForm(target, idRoom = null) {
+    $(`#chat ${target}`).submit((e) => {
+      e.preventDefault(); // prevents page reloading
+      const msg = $(`#chat ${target} #m`).val();
+      socket.emit('chat message', msg, idRoom);
+      $(`#chat ${target} #messages`).append($('<li>').text(`Você: ${msg}`));
+      $(`#chat ${target} #m`).val('');
+      socket.emit('stoped typing', idRoom);
+      return false;
+    });
+
+    $(`#chat ${target} #m`).keyup(() => {
+      if ($(`#chat ${target} #m`).val()) {
+        socket.emit('is typing', idRoom);
+      } else {
+        socket.emit('stoped typing', idRoom);
+      }
+    });
+
+    $(`#chat ${target} #m`).change(() => {
+      if (!$(`#chat ${target} #m`).val()) {
+        socket.emit('stoped typing', idRoom);
+      }
+    });
+  }
+
   function handleClickPrivate() {
     const id = $(this).attr('id');
     const nickname = $(this).children('span').text();
     socket.emit('private room', id);
     createNewChat(id, nickname);
+    handleNewForm(`#${id}`, id);
     $('#tabs-list li').on('click', handleClickTab);
+    $(`li[data-ref="${id}"]`).click();
   }
 
   function handleVisible(target, value) {
@@ -60,28 +88,7 @@ $(() => {
     return false;
   });
 
-  $('#chat form').submit((e) => {
-    e.preventDefault(); // prevents page reloading
-    socket.emit('chat message', $('#m').val());
-    $('#messages').append($('<li>').text(`Você: ${$('#m').val()}`));
-    $('#m').val('');
-    socket.emit('stoped typing');
-    return false;
-  });
-
-  $('#m').keyup(() => {
-    if ($('#m').val()) {
-      socket.emit('is typing');
-    } else {
-      socket.emit('stoped typing');
-    }
-  });
-
-  $('#m').change(() => {
-    if (!$('#m').val()) {
-      socket.emit('stoped typing');
-    }
-  });
+  handleNewForm('#geral');
 
   socket.on('chat message', (msg) => {
     $('#messages').append($('<li>').text(msg));
@@ -119,6 +126,7 @@ $(() => {
 
   socket.on('private room', ({ id, nickname }) => {
     createNewChat(id, nickname);
+    handleNewForm(`#${id}`, id);
     $('#tabs-list li').on('click', handleClickTab);
   });
 
