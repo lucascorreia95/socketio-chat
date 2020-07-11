@@ -15,4 +15,4 @@ Uma simples aplicação para simular uma sala de bate-papo, onde os usuários se
 
 ### Execução
 
-Clone o repositório deste projeto, instale as dependências, usando o npm ou yarn, e execute-o com o scritp start, depois acesse *http://localhost:3000*.
+Clone o repositório deste projeto, instale as dependências, usando o **npm install** ou **yarn**, e execute-o com o scritp **start**, depois acesse *http://localhost:3000* em seu navegador.
